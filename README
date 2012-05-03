@@ -1,5 +1,11 @@
 zxing-reader-test
-=================
+
 Simple program that reads a directory of images and tries to decode them using zxing
 
 Currently the program reads only qr codes
+
+Run:
+    command line:
+        groovy -cp lib/core.jar:lib/javase.jar src/ZxingReaderTest.groovy
+    eclipse:
+        from the run menu (requires groovy plugin installed)
