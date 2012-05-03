@@ -1,0 +1,5 @@
+zxing-reader-test
+=================
+Simple program that reads a directory of images and tries to decode them using zxing
+
+Currently the program reads only qr codes
