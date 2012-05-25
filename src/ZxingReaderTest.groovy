@@ -2,12 +2,11 @@
 import java.io.File
 import javax.imageio.*
 import java.awt.image.BufferedImage
-import groovy.io.FileType;
+import groovy.io.FileType
 import com.google.zxing.*
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.qrcode.QRCodeReader
-
 
 class ZxingReaderTest {
 
@@ -24,7 +23,7 @@ class ZxingReaderTest {
 				def binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image)))
 				Result result = reader.decode(binaryMap)
 				println "$it.name $result"
-			}catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace()
 			}
 		}
