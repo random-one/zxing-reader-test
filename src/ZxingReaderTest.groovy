@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage
 import groovy.io.FileType
 import com.google.zxing.*
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource
+// TODO: test which binarizer is better and decide to use it
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
@@ -12,6 +13,7 @@ import com.google.zxing.qrcode.QRCodeReader
 class ZxingReaderTest {
 
 	static decode(reader, file, useHints) {
+		// TODO: rewrite this helper function in groovy style
 		def image = ImageIO.read(new File(new String(file)))
 		if (image == null)
 			return
@@ -29,6 +31,7 @@ class ZxingReaderTest {
 						BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image, x, y, roiWidth, roiHeight)));
 						return reader.decode(binaryMap)
 					} catch (Exception e) {
+					// TODO: handle checksum and format exceptions or at least log them as an error
 					}
 				}
 			}
