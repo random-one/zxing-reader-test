@@ -9,8 +9,6 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
-import com.itextpdf.text.*
-import com.itextpdf.text.pdf.*
 
 class ZxingReaderTest {
 
@@ -57,25 +55,11 @@ class ZxingReaderTest {
 		def read = false
 		def resultMap = [:]
 
-		Document document = new Document(PageSize.A4)
-		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("zxing-reader-report.pdf"))
-		document.open()
-		PdfPTable table = new PdfPTable(3)
-		PdfPCell cell = new PdfPCell(new Paragraph ("File"))
-		cell.setHorizontalAlignment(Element.ALIGN_CENTER)
-		cell.setBackgroundColor(new BaseColor(204, 255, 230))
-		cell.setPadding(10.0f)
-		table.addCell(cell)
-		cell = new PdfPCell(new Paragraph("Result"))
-		cell.setHorizontalAlignment(Element.ALIGN_CENTER)
-		cell.setBackgroundColor(new BaseColor(204, 255, 230))
-		cell.setPadding (10.0f)
-		table.addCell(cell)
-		cell = new PdfPCell(new Paragraph("Preview"))
-		cell.setHorizontalAlignment(Element.ALIGN_CENTER)
-		cell.setBackgroundColor(new BaseColor(204, 255, 230))
-		cell.setPadding (10.0f)
-		table.addCell(cell)
+		ReportGenerator report = new ReportGenerator()
+		report.addHeader(3)
+		report.addHeaderColumn("File")
+		report.addHeaderColumn("Result")
+		report.addHeaderColumn("Preview")
 
 		path.eachFile FileType.FILES, {
 			try {
@@ -93,15 +77,11 @@ class ZxingReaderTest {
 					read = false
 				}
 			}
-			Image image = Image.getInstance(it.canonicalPath)
-			table.addCell(new Paragraph("$it.name"))
-			table.addCell(new Paragraph("${resultMap.get(it.name)}"))
-			table.addCell(image)
+			report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
 
 			println "${++current} / $total : $it.name " + resultMap.get(it.name)
 		}
 		println "Total images read: $totalRead"
-		document.add(table)
-		document.close();
+		report.close()
 	}
 }
