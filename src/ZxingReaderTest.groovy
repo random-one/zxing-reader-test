@@ -56,7 +56,7 @@ class ZxingReaderTest {
 		def read = false
 		def resultMap = [:]
 
-		ReportGenerator report = new ReportGenerator()
+		ReportGenerator report = new ReportGenerator("zxing-reader-report.pdf")
 		report.addHeader(2)
 		report.addHeaderColumn("File")
 		report.addHeaderColumn("Decoded Text")

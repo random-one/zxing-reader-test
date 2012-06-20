@@ -5,11 +5,11 @@ import com.itextpdf.text.pdf.*
 import com.google.zxing.*
 
 class ReportGenerator {
-	private reportName = "zxing-reader-report.pdf"
+	private reportName
 	private PdfPTable table
 	private Document report
 
-	ReportGenerator() {
+	ReportGenerator(reportName) {
 		report = new Document(PageSize.A4)
 		PdfWriter writer = PdfWriter.getInstance(report, new FileOutputStream(reportName))
 		report.open()
