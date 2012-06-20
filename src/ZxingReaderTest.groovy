@@ -56,10 +56,9 @@ class ZxingReaderTest {
 		def resultMap = [:]
 
 		ReportGenerator report = new ReportGenerator()
-		report.addHeader(3)
+		report.addHeader(2)
 		report.addHeaderColumn("File")
-		report.addHeaderColumn("Result")
-		report.addHeaderColumn("Preview")
+		report.addHeaderColumn("Decoded Text")
 
 		path.eachFile FileType.FILES, {
 			try {
@@ -81,6 +80,7 @@ class ZxingReaderTest {
 
 			println "${++current} / $total : $it.name " + resultMap.get(it.name)
 		}
+		report.table.addCell("Total images read: $totalRead")
 		println "Total images read: $totalRead"
 		report.close()
 	}
