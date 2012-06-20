@@ -1,6 +1,7 @@
 
 import java.io.File
 import javax.imageio.*
+import java.util.concurrent.TimeUnit
 import java.awt.image.BufferedImage
 import groovy.io.FileType
 import com.google.zxing.*
@@ -60,6 +61,8 @@ class ZxingReaderTest {
 		report.addHeaderColumn("File")
 		report.addHeaderColumn("Decoded Text")
 
+		def start = System.currentTimeMillis()
+
 		path.eachFile FileType.FILES, {
 			try {
 				Result result = decode(reader, it.canonicalPath, false)
@@ -76,12 +79,18 @@ class ZxingReaderTest {
 					read = false
 				}
 			}
+
 			report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
 
 			println "${++current} / $total : $it.name " + resultMap.get(it.name)
 		}
-		report.table.addCell("Total images read: $totalRead")
-		println "Total images read: $totalRead"
+		total = "Total images read: $totalRead"
+		println total
+		def end = System.currentTimeMillis()
+		def elapsed = "Time elapsed: " + TimeUnit.SECONDS.convert(end - start, TimeUnit.MILLISECONDS) + " s"
+		println elapsed
+		report.table.addCell(total)
+		report.table.addCell(elapsed)
 		report.close()
 	}
 }
