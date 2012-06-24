@@ -61,6 +61,9 @@ class ZxingReaderTest {
 		report.addHeaderColumn("File")
 		report.addHeaderColumn("Decoded Text")
 
+		def newline = System.getProperty("line.separator")
+		def outputFile = new PrintStream("zxing-reader-report.txt")
+
 		def start = System.currentTimeMillis()
 
 		path.eachFile FileType.FILES, {
@@ -80,15 +83,24 @@ class ZxingReaderTest {
 				}
 			}
 
+			def out = "${current++} / $total : $it.name "  + "result "
+			if (resultMap.get(it.name))
+				out = out + resultMap.get(it.name) + newline
+			else
+				out = out + " Unable to decode " + newline
+
 			report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
 
-			println "${++current} / $total : $it.name " + resultMap.get(it.name)
+			outputFile.append(out)
+			print out
 		}
-		total = "Total images read: $totalRead"
+		total = "Total images read: $totalRead / $total"
 		println total
+		outputFile.append(total + newline)
 		def end = System.currentTimeMillis()
 		def elapsed = "Time elapsed: " + TimeUnit.SECONDS.convert(end - start, TimeUnit.MILLISECONDS) + " s"
 		println elapsed
+		outputFile.append(elapsed)
 		report.table.addCell(total)
 		report.table.addCell(elapsed)
 		report.close()
