@@ -28,7 +28,7 @@ class ReportGenerator {
 		cell.setPadding(10.0f)
 		table.addCell(cell)
 	}
-	def addRow(name, Result result, imagePath) {
+	def addRow(name, result, imagePath) {
 		PdfPCell cell = new PdfPCell()
 		cell.setVerticalAlignment(Element.ALIGN_MIDDLE)
 		Chunk file = new Chunk(name)
@@ -37,11 +37,7 @@ class ReportGenerator {
 		p.setAlignment(Element.ALIGN_CENTER)
 		cell.addElement(p)
 		table.addCell(cell)
-
-		if (result)
-			table.addCell(result.text)
-		else
-			table.addCell("Unable to decode")
+		table.addCell(result)
 	}
 	def close() {
 		report.add(table)

@@ -50,7 +50,7 @@ class ZxingReaderTest {
 		if (!path.exists())
 			throw new Exception("Directory '$path.name' does not exist")
 
-		def current = 0
+		def current = 1
 		def total = path.list().length
 		def totalRead = 0
 		def read = false
@@ -62,6 +62,7 @@ class ZxingReaderTest {
 		report.addHeaderColumn("Decoded Text")
 
 		def newline = System.getProperty("line.separator")
+
 		def outputFile = new PrintStream("zxing-reader-report.txt")
 
 		def start = System.currentTimeMillis()
@@ -69,25 +70,26 @@ class ZxingReaderTest {
 		path.eachFile FileType.FILES, {
 			try {
 				Result result = decode(reader, it.canonicalPath, false)
-				resultMap[it.name] = result
+				resultMap[it.name] = result.text
 
 				totalRead++
 				read = true
 			} catch (Exception e) {
 				Result result = decode(reader, it.canonicalPath, true)
 
-				resultMap[it.name] = result
+				if (result)
+					resultMap[it.name] = result.text
+				else
+					resultMap[it.name] = "Unable to decode"
+
 				if (!read) {
 					totalRead++
 					read = false
 				}
 			}
 
-			def out = "${current++} / $total : $it.name "  + "result "
-			if (resultMap.get(it.name))
-				out = out + resultMap.get(it.name) + newline
-			else
-				out = out + " Unable to decode " + newline
+			def out = "${current++} / $total : $it.name | "
+			out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
 
 			report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
 
