@@ -20,19 +20,26 @@ class ZxingReaderTest {
 			return
 
 		if (useHints) {
-			for (def x = 0; x < image.width; x+=50) {
-				for (def y = 0; y < image.height; y+=50) {
-					try {
-						def roiWidth = 200, roiHeight = 200
-						if (x + roiWidth > image.width)
-							roiWidth = image.width - x
-						if (y + roiHeight > image.height)
-							roiHeight = image.height - y
+			def fib1 = 1, fib2 = 1
+			def fib
+			for (fib = fib1 + fib2; fib < 11; fib = fib1 + fib2) {
+				def roiWidth =  (1 /fib) * image.width, roiHeight = (1 / fib) * image.height
+				for (def x = 0; x < image.width; x+=50) {
+					for (def y = 0; y < image.height; y+=50) {
+						try {
+							if (roiWidth > image.width)
+								roiWidth = image.width - x
+							if (roiHeight > image.height)
+								roiHeight = image.height - y
 
-						BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image, x, y, roiWidth, roiHeight)));
-						return reader.decode(binaryMap)
-					} catch (Exception e) {
-					// TODO: handle checksum and format exceptions or at least log them as an error
+							def tmp = fib1
+							fib1 = fib
+							fib2 = tmp
+							BinaryBitmap binaryMap = new BinaryBitmap(new GlobalHistogramBinarizer(new BufferedImageLuminanceSource(image, x, y, roiWidth, roiHeight)));
+							return reader.decode(binaryMap)
+						} catch (Exception e) {
+							// TODO: handle checksum and format exceptions or at least log them as an error
+						}
 					}
 				}
 			}
