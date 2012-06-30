@@ -27,11 +27,6 @@ class ZxingReaderTest {
 				for (def x = 0; x < image.width; x+=50) {
 					for (def y = 0; y < image.height; y+=50) {
 						try {
-							if (roiWidth > image.width)
-								roiWidth = image.width - x
-							if (roiHeight > image.height)
-								roiHeight = image.height - y
-
 							def tmp = fib1
 							fib1 = fib
 							fib2 = tmp
