@@ -1,4 +1,9 @@
 
+
+import javax.swing.*
+import javax.swing.border.EmptyBorder
+import java.awt.GridBagConstraints
+import groovy.swing.SwingBuilder
 import java.io.File
 import javax.imageio.*
 import java.util.concurrent.TimeUnit
@@ -45,68 +50,170 @@ class ZxingReaderTest {
 		}
 	}
 
+
 	static main(args) {
+		def swing = new SwingBuilder()
+
 		def reader = new QRCodeReader()
-		def path = new File('images')
-
-		if (!path.exists())
-			throw new Exception("Directory '$path.name' does not exist")
-
-		def current = 1
-		def total = path.list().length
-		def totalRead = 0
-		def read = false
-		def resultMap = [:]
-
-		ReportGenerator report = new ReportGenerator("zxing-reader-report.pdf")
-		report.addHeader(2)
-		report.addHeaderColumn("File")
-		report.addHeaderColumn("Decoded Text")
-
+		def imagePath
 		def newline = System.getProperty("line.separator")
 
-		def outputFile = new PrintStream("zxing-reader-report.txt")
+		JTextField inputDirField = new JTextField()
+		inputDirField.setEditable(false)
+		JTextField inputFileField = new JTextField()
+		inputFileField.setEditable(false)
 
-		def start = System.currentTimeMillis()
+		swing.frame(title: 'ZXing Reader Test', defaultCloseOperation: JFrame.DISPOSE_ON_CLOSE,
+				size: [700, 800], show: true, locationRelativeTo: null) {
+					lookAndFeel("system")
+					panel(border:new EmptyBorder(0,0,1,1)) {
 
-		path.eachFile FileType.FILES, {
-			try {
-				Result result = decode(reader, it.canonicalPath, false)
-				resultMap[it.name] = result.text
+						gridBagLayout()
+						label(text: "Input image directory:", constraints:gbc(ipady:0, gridx:0, gridy:0, fill:GridBagConstraints.HORIZONTAL, anchor:GridBagConstraints.PAGE_START))
+						textField(inputDirField, text: "", constraints:gbc(ipady:0, gridx:1, gridy:0, fill:GridBagConstraints.HORIZONTAL))
+						checkBox(text: "Read from input file", constraints:gbc(gridx:0, gridy:1))
+						textField(inputFileField, constraints:gbc(weightx:0.5,gridx:1, gridy:1,fill:GridBagConstraints.HORIZONTAL))
+						button(text: "Browse", constraints:gbc(weightx: 0.05, gridx:2, gridy:1), actionPerformed: {
+							fileChooser = new JFileChooser()
+							fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY)
+							fileChooser.showDialog(null, "Choose")
+							textField(inputFileField, text: fileChooser.selectedFile, constraints:gbc(gridx:2, gridy: 1, fill:GridBagConstraints.HORIZONTAL))
+						})
+						textArea(rows: 10, columns: 500, constraints:gbc(fill:GridBagConstraints.BOTH,weighty:0.6, gridx:0, gridy:2, gridwidth:GridBagConstraints.REMAINDER))
+					}
+					menuBar() {
+						menu(text: "File", mnemonic: 'F') {
+							menuItem(text: "Open", mnemonic: 'O', actionPerformed: { fileChooser = new JFileChooser()
+								fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+								fileChooser.showDialog(null, "Choose")
+								imagePath = fileChooser.selectedFile
+								textField(inputDirField, text: imagePath)
+							})
+							menuItem(text: "Exit", mnemonic: 'X', actionPerformed: {dispose() })
+						}
+						menu (text: "Action", mnemonic: 'T') {
+							menuItem(text: "Decode", mnemonic: 'D', actionPerformed: {
+								println imagePath
+								def path = new File(imagePath.toString())
 
-				totalRead++
-				read = true
-			} catch (Exception e) {
-				Result result = decode(reader, it.canonicalPath, true)
+								if (!path.exists())
+									throw new Exception("Directory '$path.name' does not exist")
 
-				if (result)
-					resultMap[it.name] = result.text
-				else
-					resultMap[it.name] = "Unable to decode"
+								def current = 1
+								def total = path.list().length
+								def totalRead = 0
+								def read = false
+								def resultMap = [:]
 
-				if (!read) {
-					totalRead++
-					read = false
+								ReportGenerator report = new ReportGenerator("zxing-reader-report.pdf")
+								report.addHeader(2)
+								report.addHeaderColumn("File")
+								report.addHeaderColumn("Decoded Text")
+
+								def outputFile = new PrintStream("zxing-reader-report.txt")
+
+								def start = System.currentTimeMillis()
+
+								path.eachFile FileType.FILES, {
+									try {
+										Result result = decode(reader, it.canonicalPath, false)
+										resultMap[it.name] = result.text
+
+										totalRead++
+										read = true
+									} catch (Exception e) {
+										resultMap[it.name] = "Unable to decode"
+
+										if (!read) {
+											totalRead++
+											read = false
+										}
+									}
+
+									def out = "${current++} / $total : $it.name | "
+									out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
+
+									report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
+
+									outputFile.append(out)
+									print out
+								}
+								total = "Total images read: $totalRead / $total"
+								println total
+								outputFile.append(total + newline)
+								def end = System.currentTimeMillis()
+								def elapsed = "Time elapsed: " + TimeUnit.SECONDS.convert(end - start, TimeUnit.MILLISECONDS) + " s"
+								println elapsed
+								outputFile.append(elapsed)
+								report.table.addCell(total)
+								report.table.addCell(elapsed)
+								report.close()
+								// decode here
+							})
+							menuItem(text: "Decode Iterative", mnemonic: "I", actionPerformed: {
+								// forced decoding is done here
+								def path = new File(imagePath.toString())
+
+								if (!path.exists())
+									throw new Exception("Directory '$path.name' does not exist")
+
+								def current = 1
+								def total = path.list().length
+								def totalRead = 0
+								def read = false
+								def resultMap = [:]
+
+								ReportGenerator report = new ReportGenerator("zxing-reader-report-force-decode.pdf")
+								report.addHeader(2)
+								report.addHeaderColumn("File")
+								report.addHeaderColumn("Decoded Text")
+
+								def outputFile = new PrintStream("zxing-reader-report-force-decode.txt")
+
+								def start = System.currentTimeMillis()
+
+								path.eachFile FileType.FILES, {
+									try {
+										Result result = decode(reader, it.canonicalPath, false)
+										resultMap[it.name] = result.text
+
+										totalRead++
+										read = true
+									} catch (Exception e) {
+										Result result = decode(reader, it.canonicalPath, true)
+
+										if (result)
+											resultMap[it.name] = result.text
+										else
+											resultMap[it.name] = "Unable to decode"
+
+										if (!read) {
+											totalRead++
+											read = false
+										}
+									}
+
+									def out = "${current++} / $total : $it.name | "
+									out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
+
+									report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
+
+									outputFile.append(out)
+									print out
+								}
+								total = "Total images read: $totalRead / $total"
+								println total
+								outputFile.append(total + newline)
+								def end = System.currentTimeMillis()
+								def elapsed = "Time elapsed: " + TimeUnit.SECONDS.convert(end - start, TimeUnit.MILLISECONDS) + " s"
+								println elapsed
+								outputFile.append(elapsed)
+								report.table.addCell(total)
+								report.table.addCell(elapsed)
+								report.close()
+							})
+						}
+					}
 				}
-			}
-
-			def out = "${current++} / $total : $it.name | "
-			out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
-
-			report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
-
-			outputFile.append(out)
-			print out
-		}
-		total = "Total images read: $totalRead / $total"
-		println total
-		outputFile.append(total + newline)
-		def end = System.currentTimeMillis()
-		def elapsed = "Time elapsed: " + TimeUnit.SECONDS.convert(end - start, TimeUnit.MILLISECONDS) + " s"
-		println elapsed
-		outputFile.append(elapsed)
-		report.table.addCell(total)
-		report.table.addCell(elapsed)
-		report.close()
 	}
 }
