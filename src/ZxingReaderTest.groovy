@@ -93,7 +93,6 @@ class ZxingReaderTest {
 						}
 						menu (text: "Action", mnemonic: 'T') {
 							menuItem(text: "Decode", mnemonic: 'D', actionPerformed: {
-								println imagePath
 								def path = new File(imagePath.toString())
 
 								if (!path.exists())
@@ -155,10 +154,8 @@ class ZxingReaderTest {
 								report.table.addCell(total)
 								report.table.addCell(elapsed)
 								report.close()
-								// decode here
 							})
 							menuItem(text: "Decode Iterative", mnemonic: "I", actionPerformed: {
-								// forced decoding is done here
 								def path = new File(imagePath.toString())
 
 								if (!path.exists())
