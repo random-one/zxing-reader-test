@@ -71,7 +71,7 @@ class ZxingReaderTest {
 						gridBagLayout()
 						label(text: "Input image directory:", constraints:gbc(ipady:0, gridx:0, gridy:0, fill:GridBagConstraints.HORIZONTAL, anchor:GridBagConstraints.PAGE_START))
 						textField(inputDirField, text: "", constraints:gbc(ipady:0, gridx:1, gridy:0, fill:GridBagConstraints.HORIZONTAL))
-						checkBox(text: "Read from input file", constraints:gbc(gridx:0, gridy:1))
+						checkBox(id: "inputFileCheck", text: "Read from input file", constraints:gbc(gridx:0, gridy:1))
 						textField(inputFileField, constraints:gbc(weightx:0.5,gridx:1, gridy:1,fill:GridBagConstraints.HORIZONTAL))
 						button(text: "Browse", constraints:gbc(weightx: 0.05, gridx:2, gridy:1), actionPerformed: {
 							fileChooser = new JFileChooser()
@@ -100,7 +100,6 @@ class ZxingReaderTest {
 									throw new Exception("Directory '$path.name' does not exist")
 
 								def current = 1
-								def total = path.list().length
 								def totalRead = 0
 								def read = false
 								def resultMap = [:]
@@ -112,17 +111,25 @@ class ZxingReaderTest {
 
 								def outputFile = new PrintStream("zxing-reader-report.txt")
 
-								def start = System.currentTimeMillis()
+								fileList = []
 
-								path.eachFile FileType.FILES, {
+								if (swing.inputFileCheck.isSelected())
+									f = new File(inputFileField.text).eachLine { fileList << it }
+								else
+									path.eachFile FileType.FILES, { fileList << it.canonicalPath }
+
+								def total = fileList.size
+								def start = System.currentTimeMillis()
+								fileList.each  {
 									try {
-										Result result = decode(reader, it.canonicalPath, false)
-										resultMap[it.name] = result.text
+										Result result = decode(reader, it, false)
+										file = new File(it).getName()
+										resultMap[file] = result.text
 
 										totalRead++
 										read = true
 									} catch (Exception e) {
-										resultMap[it.name] = "Unable to decode"
+										resultMap[file] = "Unable to decode"
 
 										if (!read) {
 											totalRead++
@@ -130,10 +137,10 @@ class ZxingReaderTest {
 										}
 									}
 
-									def out = "${current++} / $total : $it.name | "
-									out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
+									def out = "${current++} / $total : $file | "
+									out = out + resultMap.get(file).replace("\n", "<br>") + newline
 
-									report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
+									report.addRow(file, resultMap.get(file), it)
 
 									outputFile.append(out)
 									print out
@@ -158,7 +165,6 @@ class ZxingReaderTest {
 									throw new Exception("Directory '$path.name' does not exist")
 
 								def current = 1
-								def total = path.list().length
 								def totalRead = 0
 								def read = false
 								def resultMap = [:]
@@ -170,22 +176,30 @@ class ZxingReaderTest {
 
 								def outputFile = new PrintStream("zxing-reader-report-force-decode.txt")
 
-								def start = System.currentTimeMillis()
+								fileList = []
 
-								path.eachFile FileType.FILES, {
+								if (swing.inputFileCheck.isSelected())
+									f = new File(inputFileField.text).eachLine { fileList << it }
+								else
+									path.eachFile FileType.FILES, { fileList << it.canonicalPath }
+
+								def total = fileList.size
+								def start = System.currentTimeMillis()
+								fileList.each {
 									try {
-										Result result = decode(reader, it.canonicalPath, false)
-										resultMap[it.name] = result.text
+										file = new File(it).getName()
+										Result result = decode(reader, it, false)
+										resultMap[file] = result.text
 
 										totalRead++
 										read = true
 									} catch (Exception e) {
-										Result result = decode(reader, it.canonicalPath, true)
+										Result result = decode(reader, it, true)
 
 										if (result)
-											resultMap[it.name] = result.text
+											resultMap[file] = result.text
 										else
-											resultMap[it.name] = "Unable to decode"
+											resultMap[file] = "Unable to decode"
 
 										if (!read) {
 											totalRead++
@@ -193,10 +207,10 @@ class ZxingReaderTest {
 										}
 									}
 
-									def out = "${current++} / $total : $it.name | "
-									out = out + resultMap.get(it.name).replace("\n", "<br>") + newline
+									def out = "${current++} / $total : $file | "
+									out = out + resultMap.get(file).replace("\n", "<br>") + newline
 
-									report.addRow(it.name, resultMap.get(it.name), it.canonicalPath)
+									report.addRow(file, resultMap.get(file), it)
 
 									outputFile.append(out)
 									print out
