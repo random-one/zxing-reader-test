@@ -102,14 +102,6 @@ class ZxingReaderTest {
 								def totalRead = 0
 								def read = false
 								def resultMap = [:]
-
-								ReportGenerator report = new ReportGenerator("zxing-reader-report.pdf")
-								report.addHeader(2)
-								report.addHeaderColumn("File")
-								report.addHeaderColumn("Decoded Text")
-
-								def outputFile = new PrintStream("zxing-reader-report.txt")
-
 								fileList = []
 
 								if (swing.inputFileCheck.isSelected())
@@ -118,6 +110,15 @@ class ZxingReaderTest {
 									path.eachFile FileType.FILES, { fileList << it.canonicalPath }
 
 								def total = fileList.size
+								def reportName = "zxing-reader-report-"+ total.toString() + "-" + new File(imagePath.toString()).getName()
+								def outputFile = new PrintStream(reportName + ".txt")
+								
+								ReportGenerator report = new ReportGenerator(reportName +".pdf")
+								report.addHeader(2)
+								report.addHeaderColumn("File")
+								report.addHeaderColumn("Decoded Text")
+
+								def file
 								def start = System.currentTimeMillis()
 								fileList.each  {
 									try {
@@ -166,13 +167,6 @@ class ZxingReaderTest {
 								def read = false
 								def resultMap = [:]
 
-								ReportGenerator report = new ReportGenerator("zxing-reader-report-force-decode.pdf")
-								report.addHeader(2)
-								report.addHeaderColumn("File")
-								report.addHeaderColumn("Decoded Text")
-
-								def outputFile = new PrintStream("zxing-reader-report-force-decode.txt")
-
 								fileList = []
 
 								if (swing.inputFileCheck.isSelected())
@@ -181,6 +175,15 @@ class ZxingReaderTest {
 									path.eachFile FileType.FILES, { fileList << it.canonicalPath }
 
 								def total = fileList.size
+								def reportName = "zxing-reader-report-"+ total.toString() + "-" + new File(imagePath.toString()).getName() + "force-decode"
+								def outputFile = new PrintStream(reportName + ".txt")
+
+								ReportGenerator report = new ReportGenerator(reportName + ".pdf")
+								report.addHeader(2)
+								report.addHeaderColumn("File")
+								report.addHeaderColumn("Decoded Text")
+
+								def file
 								def start = System.currentTimeMillis()
 								fileList.each {
 									try {
